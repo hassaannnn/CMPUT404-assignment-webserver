@@ -35,43 +35,43 @@ class MyWebServer(socketserver.BaseRequestHandler):
         allReqDetails = self.data.decode().split()
         reqType = allReqDetails[0]
         reqPath = allReqDetails[1]
-        if(reqType != "GET"):
+        if(reqType != "GET"):# handle all non get reqs
             self.handleIllegal()
             return
-        else:
+        else: # handle all the other get requests
             self.handleRegularResponse(reqPath)
              
-            #self.handleIllegal()
-        #print(allReqDetails)
-        #self.request.sendall(bytearray("OK",'utf-8'))
-    def handleIllegal(self):
+            
+        
+        
+    def handleIllegal(self): # if we need to sent 405 for non get meths
         self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n\r\n405 Method Not Allowed",'utf-8'))
         return
-    def handleIllegalPath(self):
+    def handleIllegalPath(self): # if we cant find a resource or target
         self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n\r\n404 Not found",'utf-8'))
         return
-    def handleSuccess(self, content, mimeType):
+    def handleSuccess(self, content, mimeType): # send 200 response 
         successResponse = "HTTP/1.1 200 OK\r\nContent-Type: text/" + mimeType+"\r\n\r\n" + content
         #print(successResponse)
         self.request.sendall(bytearray(successResponse,'utf-8'))
         return
-    def handleRedirect(self, path):
+    def handleRedirect(self, path): # handling redirection
         print("redirecting")
         newUrl = path + "/"+ "index.html"
-        rawNewUrl = (path + "/").replace("./www","")
+        rawNewUrl = (path + "/").replace("./www","") # this is for the respone cause we need to remove root cause its added again
         response = "HTTP/1.1 301 Move Permanently\r\nLocation: " + rawNewUrl + "\r\nContent-Type: text/html\r\n\r\n"
 
-        try:
+        try:# open file read and add to responses
             resFile=open(newUrl, "r")
             fileCont = resFile.read()
             response += fileCont
             self.request.sendall(bytearray(response,'utf-8'))
             return
-        except Exception as e:
+        except Exception as e:# handle if file is not found
             print("File is not found " , e )
             self.handleIllegalPath()
             return
-    def handleNormal(self,path):
+    def handleNormal(self,path):# handle normal dir paths when we want just index.html
         newUrl = path + "index.html"
         try:
             resFile = open(newUrl, "r")
@@ -83,19 +83,20 @@ class MyWebServer(socketserver.BaseRequestHandler):
             return
             
         
-    def handleRegularResponse(self,reqPath):
+    def handleRegularResponse(self,reqPath): # origni points for all reqests
         
         if("../" in reqPath):# Security check
             print("illegal path")
             self.handleIllegalPath()
             return
         
-        fileRoot = './www'
-        path = fileRoot + reqPath
+        fileRoot = './www' # root path
+        path = fileRoot + reqPath # combine root and path
         #print(reqPath)
         #print(path)
         if(len(reqPath.split(".")) == 2):# If there is file extension(mime specified)
             mimeType = reqPath.split(".")[1]
+            print(mimeType)
             #resFile=open(path, "r")
             
             try: # check if they want specific site
@@ -113,7 +114,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             if(path[-1] != "/"):
                 self.handleRedirect(path)
                 return
-            else:
+            else: # handle serve normal files
                 print("serving index regularyly")
                 self.handleNormal(path)
                 return
