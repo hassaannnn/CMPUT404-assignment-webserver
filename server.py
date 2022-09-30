@@ -56,7 +56,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         self.request.sendall(bytearray(successResponse,'utf-8'))
         return
     def handleRedirect(self, path): # handling redirection
-        print("redirecting")
+        #print("redirecting")
         newUrl = path + "/"+ "index.html"
         rawNewUrl = (path + "/").replace("./www","") # this is for the respone cause we need to remove root cause its added again
         response = "HTTP/1.1 301 Move Permanently\r\nLocation: " + rawNewUrl + "\r\nContent-Type: text/html\r\n\r\n"
@@ -68,7 +68,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             self.request.sendall(bytearray(response,'utf-8'))
             return
         except Exception as e:# handle if file is not found
-            print("File is not found " , e )
+            #print("File is not found " , e )
             self.handleIllegalPath()
             return
     def handleNormal(self,path):# handle normal dir paths when we want just index.html
@@ -96,7 +96,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         #print(path)
         if(len(reqPath.split(".")) == 2):# If there is file extension(mime specified)
             mimeType = reqPath.split(".")[1]
-            print(mimeType)
+            #print(mimeType)
             #resFile=open(path, "r")
             
             try: # check if they want specific site
@@ -105,17 +105,17 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 self.handleSuccess( fileCont,mimeType)
                 return
             except Exception as e:
-                print("File is not found " , e )
+                #print("File is not found " , e )
                 self.handleIllegalPath()
                 return
         else:# Check directory serve index.html
             # handle redirection
-            print("serving index")
+            #print("serving index")
             if(path[-1] != "/"):
                 self.handleRedirect(path)
                 return
             else: # handle serve normal files
-                print("serving index regularyly")
+                #print("serving index regularyly")
                 self.handleNormal(path)
                 return
             
